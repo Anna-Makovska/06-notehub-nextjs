@@ -16,8 +16,13 @@ const Modal = ({ children, onClose }: ModalProps) => {
       }
     };
 
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {

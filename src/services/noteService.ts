@@ -8,9 +8,7 @@ const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 interface FetchNotesResponse {
   notes: Note[];
-  total: number;
-  page: number;
-  perPage: number;
+  totalPages: number;
 }
 
 interface FetchNotesParams {
