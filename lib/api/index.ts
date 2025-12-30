@@ -33,10 +33,6 @@ interface DeleteNoteResponse {
   note: Note;
 }
 
-interface FetchNoteByIdResponse {
-  note: Note;
-}
-
 export const fetchNotes = async (
   params: FetchNotesParams = {}
 ): Promise<FetchNotesResponse> => {
@@ -57,13 +53,13 @@ export const fetchNotes = async (
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const response = await axios.get<FetchNoteByIdResponse>(`/notes/${id}`, {
+  const response = await axios.get<Note>(`/notes/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data.note;
+  return response.data;
 };
 
 export const createNote = async (
