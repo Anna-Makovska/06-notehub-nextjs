@@ -22,7 +22,6 @@ export default function NotesClient() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", page, debouncedSearch],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch }),
-    refetchOnMount: false,
   });
 
   const createMutation = useMutation({
@@ -52,7 +51,7 @@ export default function NotesClient() {
     deleteMutation.mutate(noteId);
   };
 
-  const totalPages = data ? Math.ceil(data.total / data.perPage) : 0;
+  const totalPages = data?.totalPages ?? 0;
 
   return (
     <main className={css.app}>
