@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import css from "./Notes.module.css";
 import NoteList from "@/components/NoteList/NoteList";
@@ -9,7 +9,7 @@ import SearchBox from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
 import Modal from "@/components/Modal/Modal";
 import NoteForm from "@/components/NoteForm/NoteForm";
-import { fetchNotes, createNote, deleteNote } from "@/lib/api";
+import { fetchNotes } from "@/lib/api";
 
 export default function NotesClient() {
   const [page, setPage] = useState(1);
@@ -17,7 +17,10 @@ export default function NotesClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [debouncedSearch] = useDebounce(search, 300);
 
-  const queryClient = useQueryClient();
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", page, debouncedSearch],
@@ -25,39 +28,12 @@ export default function NotesClient() {
     placeholderData: (previousData) => previousData,
   });
 
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      setIsModalOpen(false);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-    },
-  });
-
-  const handleCreateNote = (values: {
-    title: string;
-    content: string;
-    tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
-  }) => {
-    createMutation.mutate(values);
-  };
-
-  const handleDeleteNote = (noteId: string) => {
-    deleteMutation.mutate(noteId);
-  };
-
   const totalPages = data?.totalPages ?? 0;
 
   return (
     <main className={css.app}>
       <div className={css.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
+        <SearchBox value={search} onChange={handleSearchChange} />
         {totalPages > 1 && (
           <Pagination
             pageCount={totalPages}
@@ -72,16 +48,11 @@ export default function NotesClient() {
 
       {isLoading && <div>Loading...</div>}
       {isError && <div>Error loading notes</div>}
-      {data && data.notes.length > 0 && (
-        <NoteList notes={data.notes} onDelete={handleDeleteNote} />
-      )}
+      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm
-            onSubmit={handleCreateNote}
-            onCancel={() => setIsModalOpen(false)}
-          />
+          <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </main>
